@@ -1,6 +1,6 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const { createEnv, string, number } = require('@navnathgunjal/envcheck');
+const { createEnv, string, number } = require("@navnathgunjal/envcheck");
 
 /**
  * Validate and export all required environment variables.
@@ -11,6 +11,7 @@ const env = createEnv({
   JWT_SECRET: string(),
   GEMINI_API_KEY: string(),
   DATABASE_URL: string(),
+  FRONTEND_URL: string(),
 });
 
 module.exports = env;
