@@ -16,7 +16,7 @@ const allowedOrigins = env.FRONTEND_URL
   : [
       "http://localhost:5173",
       "http://localhost:3000",
-      "https://better-debate.vercel.app",
+      "https://better-debate-6iny.vercel.app",
     ];
 
 // Middleware
