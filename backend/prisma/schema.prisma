@@ -1,0 +1,75 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String    @unique
+  passkeyHash  String    @map("passkey_hash")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  debatesAsP1  Debate[]  @relation("Participant1")
+  debatesAsP2  Debate[]  @relation("Participant2")
+  arguments    Argument[]
+
+  @@map("users")
+}
+
+model Debate {
+  id              Int       @id @default(autoincrement())
+  topic           String
+  customTopic     Boolean   @default(false) @map("custom_topic")
+  participant1Id  Int?      @map("participant1_id")
+  participant2Id  Int?      @map("participant2_id")
+  status          String    @default("waiting")   // waiting | active | completed
+  currentTurn     Int       @default(1) @map("current_turn")
+  maxTurns        Int       @default(5) @map("max_turns")
+  joinCode        String?   @map("join_code")
+  p1Position      String?   @map("p1_position")
+  p2Position      String?   @map("p2_position")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  completedAt     DateTime? @map("completed_at")
+
+  participant1    User?     @relation("Participant1", fields: [participant1Id], references: [id])
+  participant2    User?     @relation("Participant2", fields: [participant2Id], references: [id])
+  arguments       Argument[]
+  summary         DebateSummary?
+
+  @@map("debates")
+}
+
+model Argument {
+  id                Int       @id @default(autoincrement())
+  debateId          Int       @map("debate_id")
+  userId            Int       @map("user_id")
+  participantSlot   Int       @map("participant_slot")
+  roundNumber       Int       @map("round_number")
+  content           String
+  submittedAt       DateTime  @default(now()) @map("submitted_at")
+  aiAnalysis        String?   @map("ai_analysis")   // JSON string
+  aiAnalysisStatus  String    @default("pending") @map("ai_analysis_status")  // pending | done | failed
+
+  debate  Debate  @relation(fields: [debateId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("arguments")
+}
+
+model DebateSummary {
+  id          Int       @id @default(autoincrement())
+  debateId    Int       @unique @map("debate_id")
+  summary     String                              // JSON string
+  generatedAt DateTime  @default(now()) @map("generated_at")
+
+  debate  Debate  @relation(fields: [debateId], references: [id])
+
+  @@map("debate_summaries")
+}
