@@ -167,20 +167,32 @@ router.get('/public', async (req, res) => {
       ];
     }
 
-    const [debates, totalCount] = await Promise.all([
-      prisma.debate.findMany({
-        where: whereClause,
-        include: {
-          participant1: { select: { id: true, name: true } },
-          participant2: { select: { id: true, name: true } },
-          summary: true,
-        },
-        orderBy: { completedAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      prisma.debate.count({ where: whereClause })
-    ]);
+    let debates = [];
+    let totalCount = 0;
+    
+    try {
+      [debates, totalCount] = await Promise.all([
+        prisma.debate.findMany({
+          where: whereClause,
+          include: {
+            participant1: { select: { id: true, name: true } },
+            participant2: { select: { id: true, name: true } },
+            summary: true,
+          },
+          orderBy: { completedAt: 'desc' },
+          skip,
+          take: limit,
+        }),
+        prisma.debate.count({ where: whereClause })
+      ]);
+    } catch (dbErr) {
+      // P2021 is "The table does not exist in the current database"
+      if (dbErr.code === 'P2021' || (dbErr.message && dbErr.message.includes('does not exist'))) {
+        console.warn('Debates table does not exist yet. Returning empty list.');
+      } else {
+        throw dbErr;
+      }
+    }
 
     const formatted = debates.map((d) => ({
       id: d.id,
