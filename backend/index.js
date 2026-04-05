@@ -40,6 +40,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(env.PORT, () => {
-  console.log(`🎯 BetterDebate backend running on http://localhost:${env.PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(env.PORT, () => {
+    console.log(`🎯 BetterDebate backend running on http://localhost:${env.PORT}`);
+  });
+}
+
+module.exports = app;
