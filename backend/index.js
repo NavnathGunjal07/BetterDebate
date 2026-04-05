@@ -11,9 +11,13 @@ const summaryRoutes = require('./routes/summary');
 
 const app = express();
 
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json());
@@ -27,6 +31,11 @@ app.use('/api/debates/:id/summary', summaryRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Root health check
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'BetterDebate API is running', timestamp: new Date().toISOString() });
 });
 
 // 404 handler
